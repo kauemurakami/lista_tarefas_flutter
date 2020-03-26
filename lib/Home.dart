@@ -14,11 +14,13 @@ class _HomeState extends State<Home> {
   TextEditingController _controller = TextEditingController();
   List _tarefas = [];
 
-  _salvar() async {
-
+  Future<File> _getFile() async{
     final diretorio = await getApplicationDocumentsDirectory();
-    var arquivo = File("${diretorio.path}/dados.json");
+    return File("${diretorio.path}/dados.json");
+  }
 
+  _salvar() async {
+    var arquivo = await _getFile();
     //criar dados
     Map<String, dynamic> tarefa = Map();
     tarefa["título"] = "Ir ao mercado";
@@ -31,8 +33,30 @@ class _HomeState extends State<Home> {
 
   }
 
+  _ler() async{
+    try{
+      final arquivo = await _getFile();
+      return arquivo.readAsString();
+    }catch(e){
+      return null;
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _ler().then(
+        (dados){
+         setState(() {
+           _tarefas = json.decode(dados);
+         });
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.purple,
@@ -71,10 +95,10 @@ class _HomeState extends State<Home> {
                     labelStyle: TextStyle(
                       color: Colors.purple,
                     ),
-                    enabledBorder: UnderlineInputBorder(
+                    enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.purpleAccent),
                     ),
-                    focusedBorder: UnderlineInputBorder(
+                    focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.purple),
                     ),
                   ),
