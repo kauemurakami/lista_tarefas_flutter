@@ -19,18 +19,25 @@ class _HomeState extends State<Home> {
     return File("${diretorio.path}/dados.json");
   }
 
-  _salvar() async {
+  _salvarArquivo() async {
     var arquivo = await _getFile();
-    //criar dados
-    Map<String, dynamic> tarefa = Map();
-    tarefa["título"] = "Ir ao mercado";
-    tarefa["realizada"] = false;
-    _tarefas.add(tarefa);
     //converter json
     String dados = json.encode(_tarefas);
     //adicionando no arquivo
     arquivo.writeAsString(dados);
+  }
 
+  _salvarTarefa() async{
+    String tarefaDigitada = _controller.text;
+
+    Map<String, dynamic> tarefa = Map();
+    tarefa["titulo"] = tarefaDigitada;
+    tarefa["realizada"] = false;
+    setState(() {
+      _tarefas.add(tarefa);
+    });
+    _salvarArquivo();
+    _controller.clear();
   }
 
   _ler() async{
@@ -68,9 +75,19 @@ class _HomeState extends State<Home> {
               child: ListView.builder(
                 itemCount: _tarefas.length,
                   itemBuilder: (context, index){
-                    return ListTile(
-                      title: Text(_tarefas[index]),
+                    print(_tarefas);
+
+                    return CheckboxListTile(
+                      title: Text(_tarefas[index]['titulo']),
+                      value: _tarefas[index]['realizada'],
+                      onChanged: (value){
+                        setState(() {
+                            _tarefas[index]['realizada'] = value;
+                        });
+                        _salvarArquivo();
+                      },
                     );
+                    print(_tarefas);
                   },
               ),
           ),
@@ -106,6 +123,7 @@ class _HomeState extends State<Home> {
 
                   },
                   cursorColor: Colors.purpleAccent,
+                  controller: _controller,
                 ),
                 actions: <Widget>[
                   FlatButton(
@@ -123,7 +141,7 @@ class _HomeState extends State<Home> {
                   FlatButton(
                     splashColor: Colors.green,
                     onPressed: (){
-
+                      _salvarTarefa();
                       Navigator.pop(context);
                     },
                     child: Text(
