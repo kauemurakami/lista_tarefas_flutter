@@ -1,4 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:async';
+import 'dart:convert';
 
 class Home extends StatefulWidget {
   @override
@@ -7,8 +11,25 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
-  //TextEditingController _controller = TextEditingController();
-  List _tarefas = ["Ir ao mercado", "estudar", "caminhar"];
+  TextEditingController _controller = TextEditingController();
+  List _tarefas = [];
+
+  _salvar() async {
+
+    final diretorio = await getApplicationDocumentsDirectory();
+    var arquivo = File("${diretorio.path}/dados.json");
+
+    //criar dados
+    Map<String, dynamic> tarefa = Map();
+    tarefa["título"] = "Ir ao mercado";
+    tarefa["realizada"] = false;
+    _tarefas.add(tarefa);
+    //converter json
+    String dados = json.encode(_tarefas);
+    //adicionando no arquivo
+    arquivo.writeAsString(dados);
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +85,7 @@ class _HomeState extends State<Home> {
                 ),
                 actions: <Widget>[
                   FlatButton(
+                    splashColor: Colors.red,
                       onPressed: (){
                         Navigator.pop(context);
                       },
@@ -75,6 +97,7 @@ class _HomeState extends State<Home> {
                       ),
                   ),
                   FlatButton(
+                    splashColor: Colors.green,
                     onPressed: (){
 
                       Navigator.pop(context);
