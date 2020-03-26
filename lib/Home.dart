@@ -19,6 +19,42 @@ class _HomeState extends State<Home> {
     return File("${diretorio.path}/dados.json");
   }
 
+  Widget criarItemLista(context, index){
+    final item = _tarefas[index]["titulo"];
+    return Dismissible(
+      key: Key(item),
+      direction: DismissDirection.endToStart,
+      onDismissed: (direction){
+        //remover item da lista
+        _tarefas.removeAt(index);
+        _salvarArquivo();
+      },
+      background: Container(
+        padding: EdgeInsets.all(16),
+        color: Colors.red,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Icon(
+              Icons.delete,
+              color: Colors.white,
+            ),
+          ],
+        )
+      ),
+        child: CheckboxListTile(
+          title: Text(_tarefas[index]['titulo']),
+          value: _tarefas[index]['realizada'],
+          onChanged: (value){
+            setState(() {
+              _tarefas[index]['realizada'] = value;
+            });
+            _salvarArquivo();
+          },
+        ),
+    );
+  }
+
   _salvarArquivo() async {
     var arquivo = await _getFile();
     //converter json
@@ -74,21 +110,7 @@ class _HomeState extends State<Home> {
           Expanded(
               child: ListView.builder(
                 itemCount: _tarefas.length,
-                  itemBuilder: (context, index){
-                    print(_tarefas);
-
-                    return CheckboxListTile(
-                      title: Text(_tarefas[index]['titulo']),
-                      value: _tarefas[index]['realizada'],
-                      onChanged: (value){
-                        setState(() {
-                            _tarefas[index]['realizada'] = value;
-                        });
-                        _salvarArquivo();
-                      },
-                    );
-                    print(_tarefas);
-                  },
+                  itemBuilder: criarItemLista
               ),
           ),
         ],
