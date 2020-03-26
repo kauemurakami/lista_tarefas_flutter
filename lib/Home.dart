@@ -13,6 +13,7 @@ class _HomeState extends State<Home> {
 
   TextEditingController _controller = TextEditingController();
   List _tarefas = [];
+  Map<String,dynamic> _removido = Map();
 
   Future<File> _getFile() async{
     final diretorio = await getApplicationDocumentsDirectory();
@@ -20,14 +21,34 @@ class _HomeState extends State<Home> {
   }
 
   Widget criarItemLista(context, index){
-    final item = _tarefas[index]["titulo"];
+
     return Dismissible(
-      key: Key(item),
+      key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
       direction: DismissDirection.endToStart,
       onDismissed: (direction){
+
+        //recuperar o item a ser excluido
+        _removido = _tarefas[index];
         //remover item da lista
         _tarefas.removeAt(index);
         _salvarArquivo();
+
+        //snackBar retroceder a decisão
+        final snackbar = SnackBar(
+          duration: Duration(seconds: 4),
+          action: SnackBarAction(
+              label: "Desfazer",
+              onPressed: (){
+                setState(() {
+                  _tarefas.insert(index, _removido);
+                  _salvarArquivo();
+                });
+              }),
+            content: Text("Tarefa removida !"),
+        );
+
+        Scaffold.of(context).showSnackBar(snackbar);
+
       },
       background: Container(
         padding: EdgeInsets.all(16),
